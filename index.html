@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduTrack — Student Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #13161d;
+    --surface2: #1c2030;
+    --border: rgba(255,255,255,0.07);
+    --accent: #4fffb0;
+    --accent2: #ff6b6b;
+    --accent3: #ffd166;
+    --text: #e8ecf4;
+    --muted: #6b738a;
+    --sidebar-w: 240px;
+    --radius: 14px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    padding: 28px 0 20px;
+    transition: transform 0.3s ease;
+  }
+
+  .logo {
+    padding: 0 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg { color: #0a0c10; }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  nav { padding: 20px 14px; flex: 1; }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    padding: 0 10px;
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 10px;
+    border-radius: 10px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(79,255,176,0.1); color: var(--accent); }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .sidebar-footer {
+    padding: 16px 14px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 0;
+  }
+
+  .user-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .user-card:hover { background: var(--surface2); }
+
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #00c97a);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    color: #0a0c10; flex-shrink: 0;
+  }
+
+  .user-info p:first-child { font-weight: 600; font-size: 13px; }
+  .user-info p:last-child { color: var(--muted); font-size: 11px; }
+
+  /* MAIN */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(10px);
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    width: 240px;
+    transition: border-color 0.2s;
+  }
+  .search-bar:focus-within { border-color: var(--accent); }
+  .search-bar svg { color: var(--muted); flex-shrink: 0; }
+  .search-bar input { background: none; border: none; outline: none; color: var(--text); font-family: inherit; font-size: 13px; width: 100%; }
+  .search-bar input::placeholder { color: var(--muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 18px; border-radius: 10px;
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #0a0c10; }
+  .btn-primary:hover { background: #3de8a0; transform: translateY(-1px); }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: rgba(255,107,107,0.15); color: var(--accent2); border: 1px solid rgba(255,107,107,0.2); }
+  .btn-danger:hover { background: rgba(255,107,107,0.25); }
+
+  .content { padding: 32px; flex: 1; }
+
+  /* SECTION VISIBILITY */
+  .section { display: none; }
+  .section.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* STATS CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: rgba(79,255,176,0.2); }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.3;
+  }
+  .stat-card:nth-child(1)::after { background: var(--accent); }
+  .stat-card:nth-child(2)::after { background: var(--accent3); }
+  .stat-card:nth-child(3)::after { background: #a78bfa; }
+  .stat-card:nth-child(4)::after { background: var(--accent2); }
+
+  .stat-label { font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+  .stat-change { font-size: 12px; color: var(--accent); }
+  .stat-change.down { color: var(--accent2); }
+
+  /* TABLE */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  td { padding: 14px 16px; font-size: 14px; }
+
+  .badge {
+    display: inline-flex;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-green { background: rgba(79,255,176,0.12); color: var(--accent); }
+  .badge-yellow { background: rgba(255,209,102,0.12); color: var(--accent3); }
+  .badge-red { background: rgba(255,107,107,0.12); color: var(--accent2); }
+  .badge-purple { background: rgba(167,139,250,0.12); color: #a78bfa; }
+
+  .student-name { font-weight: 600; }
+  .student-id { color: var(--muted); font-size: 12px; }
+
+  .actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.del:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* MODAL */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 500px;
+    max-width: 95vw;
+    padding: 32px;
+    animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input, .form-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-select option { background: var(--surface2); }
+
+  .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+
+  /* GRADES */
+  .grade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
+  .grade-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .grade-card:hover { transform: translateY(-2px); }
+  .grade-subject { font-size: 12px; color: var(--muted); margin-bottom: 12px; font-weight: 500; }
+  .grade-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .grade-letter { font-size: 13px; font-weight: 600; }
+
+  /* ATTENDANCE */
+  .attendance-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 1s ease;
+  }
+
+  /* NOTIFICATION */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    font-size: 14px;
+    font-weight: 500;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { color: var(--accent); }
+
+  /* DASHBOARD BOTTOM */
+  .dashboard-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+
+  .recent-list { padding: 0 24px 16px; }
+  .recent-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .recent-item:last-child { border-bottom: none; }
+  .ri-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .ri-info { flex: 1; }
+  .ri-name { font-weight: 600; font-size: 14px; }
+  .ri-meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .ri-score { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; }
+
+  /* Schedule items */
+  .schedule-item {
+    display: flex; gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .schedule-item:last-child { border-bottom: none; }
+  .schedule-time {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-align: right;
+    width: 52px;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+  .schedule-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .schedule-info { flex: 1; }
+  .schedule-name { font-weight: 600; font-size: 14px; }
+  .schedule-room { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Page title area */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .section-header h2 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
+  .section-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 12px; padding: 4px; }
+  .tab {
+    padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 500; color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab.active { background: var(--surface); color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+      </svg>
+    </div>
+    <div class="logo-text">Edu<span>Track</span></div>
+  </div>
+
+  <nav>
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" data-section="dashboard">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+
+    <div class="nav-label">Management</div>
+    <div class="nav-item" data-section="students">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Students
+    </div>
+    <div class="nav-item" data-section="grades">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Grades
+    </div>
+    <div class="nav-item" data-section="attendance">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Attendance
+    </div>
+    <div class="nav-item" data-section="schedule">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Schedule
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">AD</div>
+      <div class="user-info">
+        <p>Admin User</p>
+        <p>Administrator</p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <div class="page-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-actions">
+      <div class="search-bar">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="globalSearch" placeholder="Search students...">
+      </div>
+      <button class="btn btn-primary" id="addStudentBtn">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Student
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <section class="section active" id="dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Students</div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-change">↑ 4 this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg. GPA</div>
+          <div class="stat-value" id="statGpa">0.0</div>
+          <div class="stat-change">↑ 0.2 from last term</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Attendance Rate</div>
+          <div class="stat-value" id="statAttendance">0%</div>
+          <div class="stat-change">↑ 2.1% this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Courses</div>
+          <div class="stat-value">6</div>
+          <div class="stat-change down">2 ending soon</div>
+        </div>
+      </div>
+
+      <div class="dashboard-bottom">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top Performers</div>
+          </div>
+          <div class="recent-list" id="topPerformers"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Today's Schedule</div>
+          </div>
+          <div class="recent-list">
+            <div class="schedule-item">
+              <div class="schedule-time">8:00<br>AM</div>
+              <div class="schedule-dot" style="background:#4fffb0"></div>
+              <div class="schedule-info"><div class="schedule-name">Mathematics</div><div class="schedule-room">Room 201 · Mr. Thompson</div></div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-time">10:00<br>AM</div>
+              <div class="schedule-dot" style="background:#ffd166"></div>
+              <div class="schedule-info"><div class="schedule-name">Physics</div><div class="schedule-room">Lab B · Dr. Kim</div></div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-time">1:00<br>PM</div>
+              <div class="schedule-dot" style="background:#a78bfa"></div>
+              <div class="schedule-info"><div class="schedule-name">Literature</div><div class="schedule-room">Room 104 · Ms. Clarke</div></div>
+            </div>
+            <div class="schedule-item">
+              <div class="schedule-time">3:00<br>PM</div>
+              <div class="schedule-dot" style="background:#ff6b6b"></div>
+              <div class="schedule-info"><div class="schedule-name">Chemistry</div><div class="schedule-room">Lab A · Dr. Patel</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section class="section" id="students">
+      <div class="section-header">
+        <div>
+          <h2>Students</h2>
+          <p>Manage all enrolled students</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Students</div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span id="studentCount" style="color:var(--muted);font-size:13px;"></span>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Grade</th>
+              <th>GPA</th>
+              <th>Attendance</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- GRADES -->
+    <section class="section" id="grades">
+      <div class="section-header">
+        <div>
+          <h2>Academic Grades</h2>
+          <p>Subject-wise performance overview</p>
+        </div>
+      </div>
+      <div class="grade-grid" id="gradeGrid"></div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Grade Distribution</div></div>
+        <table>
+          <thead>
+            <tr><th>Student</th><th>Math</th><th>Science</th><th>Literature</th><th>History</th><th>Physics</th><th>Chemistry</th><th>GPA</th></tr>
+          </thead>
+          <tbody id="gradeTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section class="section" id="attendance">
+      <div class="section-header">
+        <div>
+          <h2>Attendance</h2>
+          <p>Track student attendance records</p>
+        </div>
+      </div>
+      <div class="attendance-summary" id="attendanceSummary"></div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Attendance Records</div></div>
+        <table>
+          <thead>
+            <tr><th>Student</th><th>Present Days</th><th>Absent Days</th><th>Rate</th><th>Status</th></tr>
+          </thead>
+          <tbody id="attendanceTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section class="section" id="schedule">
+      <div class="section-header">
+        <div>
+          <h2>Class Schedule</h2>
+          <p>Weekly timetable overview</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Weekly Timetable</div></div>
+        <table>
+          <thead>
+            <tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>8:00 AM</strong></td>
+              <td><span class="badge badge-green">Mathematics</span></td>
+              <td><span class="badge badge-purple">Literature</span></td>
+              <td><span class="badge badge-green">Mathematics</span></td>
+              <td><span class="badge badge-yellow">Physics</span></td>
+              <td><span class="badge badge-green">Mathematics</span></td>
+            </tr>
+            <tr>
+              <td><strong>10:00 AM</strong></td>
+              <td><span class="badge badge-yellow">Physics</span></td>
+              <td><span class="badge badge-green">Mathematics</span></td>
+              <td><span class="badge badge-red">Chemistry</span></td>
+              <td><span class="badge badge-green">Mathematics</span></td>
+              <td><span class="badge badge-purple">Literature</span></td>
+            </tr>
+            <tr>
+              <td><strong>1:00 PM</strong></td>
+              <td><span class="badge badge-purple">Literature</span></td>
+              <td><span class="badge badge-red">Chemistry</span></td>
+              <td><span class="badge badge-yellow">Physics</span></td>
+              <td><span class="badge badge-purple">Literature</span></td>
+              <td><span class="badge badge-red">Chemistry</span></td>
+            </tr>
+            <tr>
+              <td><strong>3:00 PM</strong></td>
+              <td><span class="badge badge-red">Chemistry</span></td>
+              <td><span class="badge badge-yellow">Physics</span></td>
+              <td><span class="badge badge-purple">Literature</span></td>
+              <td><span class="badge badge-red">Chemistry</span></td>
+              <td><span class="badge badge-yellow">Physics</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add New Student</div>
+      <button class="icon-btn" onclick="closeModal()">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="form-grid">
+      <input type="hidden" id="editIndex" value="">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input class="form-input" id="firstName" placeholder="John">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input class="form-input" id="lastName" placeholder="Doe">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grade Level</label>
+        <select class="form-select" id="gradeLevel">
+          <option value="Grade 9">Grade 9</option>
+          <option value="Grade 10">Grade 10</option>
+          <option value="Grade 11">Grade 11</option>
+          <option value="Grade 12">Grade 12</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="status">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Probation">Probation</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="email" placeholder="john.doe@school.edu" type="email">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg class="toast-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+  <span id="toastMsg">Student saved successfully!</span>
+</div>
+
+<script>
+// ====== DATA ======
+const avatarColors = ['#4fffb0','#ffd166','#a78bfa','#ff6b6b','#60a5fa','#fb923c'];
+const subjects = ['Math', 'Science', 'Literature', 'History', 'Physics', 'Chemistry'];
+const subjectIcons = ['📐','🔬','📖','🏛','⚛️','🧪'];
+
+let students = [
+  { id:'STU001', firstName:'Alice', lastName:'Johnson', grade:'Grade 11', status:'Active', email:'alice.j@school.edu', gpa: 3.9, attendance: 96, scores: [95,92,88,90,94,89] },
+  { id:'STU002', firstName:'Marcus', lastName:'Williams', grade:'Grade 10', status:'Active', email:'m.williams@school.edu', gpa: 3.6, attendance: 91, scores: [88,85,90,82,86,91] },
+  { id:'STU003', firstName:'Sophia', lastName:'Chen', grade:'Grade 12', status:'Active', email:'s.chen@school.edu', gpa: 4.0, attendance: 98, scores: [98,97,95,99,96,98] },
+  { id:'STU004', firstName:'Liam', lastName:'Torres', grade:'Grade 9', status:'Active', email:'l.torres@school.edu', gpa: 3.2, attendance: 85, scores: [78,82,75,80,76,84] },
+  { id:'STU005', firstName:'Emma', lastName:'Davis', grade:'Grade 11', status:'Probation', email:'e.davis@school.edu', gpa: 2.7, attendance: 72, scores: [68,71,65,74,69,70] },
+  { id:'STU006', firstName:'Noah', lastName:'Brown', grade:'Grade 12', status:'Active', email:'n.brown@school.edu', gpa: 3.8, attendance: 94, scores: [92,90,93,88,95,91] },
+];
+
+let nextId = 7;
+
+// ====== NAVIGATION ======
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    const sec = item.dataset.section;
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(sec).classList.add('active');
+    document.getElementById('pageTitle').textContent = item.textContent.trim();
+    render();
+  });
+});
+
+// ====== MODAL ======
+function openModal(editIdx = null) {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('editIndex').value = editIdx !== null ? editIdx : '';
+  if (editIdx !== null) {
+    const s = students[editIdx];
+    document.getElementById('modalTitle').textContent = 'Edit Student';
+    document.getElementById('firstName').value = s.firstName;
+    document.getElementById('lastName').value = s.lastName;
+    document.getElementById('gradeLevel').value = s.grade;
+    document.getElementById('status').value = s.status;
+    document.getElementById('email').value = s.email;
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add New Student';
+    document.getElementById('firstName').value = '';
+    document.getElementById('lastName').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('gradeLevel').value = 'Grade 9';
+    document.getElementById('status').value = 'Active';
+  }
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+document.getElementById('addStudentBtn').addEventListener('click', () => openModal());
+document.getElementById('overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+function saveStudent() {
+  const fn = document.getElementById('firstName').value.trim();
+  const ln = document.getElementById('lastName').value.trim();
+  if (!fn || !ln) { showToast('Please enter first and last name.', true); return; }
+
+  const editIdx = document.getElementById('editIndex').value;
+  const studentData = {
+    firstName: fn,
+    lastName: ln,
+    grade: document.getElementById('gradeLevel').value,
+    status: document.getElementById('status').value,
+    email: document.getElementById('email').value,
+  };
+
+  if (editIdx !== '') {
+    const i = parseInt(editIdx);
+    students[i] = { ...students[i], ...studentData };
+    showToast('Student updated successfully!');
+  } else {
+    studentData.id = 'STU' + String(nextId++).padStart(3, '0');
+    studentData.gpa = (Math.random() * 1.5 + 2.5).toFixed(1) * 1;
+    studentData.attendance = Math.floor(Math.random() * 20 + 78);
+    studentData.scores = subjects.map(() => Math.floor(Math.random() * 30 + 65));
+    students.push(studentData);
+    showToast('Student added successfully!');
+  }
+  closeModal();
+  render();
+}
+
+function deleteStudent(i) {
+  if (confirm(`Delete ${students[i].firstName} ${students[i].lastName}?`)) {
+    students.splice(i, 1);
+    showToast('Student removed.');
+    render();
+  }
+}
+
+function showToast(msg, err = false) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.style.borderColor = err ? 'var(--accent2)' : 'var(--accent)';
+  t.querySelector('svg').style.color = err ? 'var(--accent2)' : 'var(--accent)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ====== RENDER ======
+function getInitials(s) { return s.firstName[0] + s.lastName[0]; }
+function getColor(i) { return avatarColors[i % avatarColors.length]; }
+
+function gradeColor(score) {
+  if (score >= 90) return 'var(--accent)';
+  if (score >= 80) return '#60a5fa';
+  if (score >= 70) return 'var(--accent3)';
+  return 'var(--accent2)';
+}
+
+function letterGrade(score) {
+  if (score >= 90) return 'A';
+  if (score >= 80) return 'B';
+  if (score >= 70) return 'C';
+  if (score >= 60) return 'D';
+  return 'F';
+}
+
+function statusBadge(status) {
+  const map = { Active: 'badge-green', Inactive: 'badge-yellow', Probation: 'badge-red' };
+  return `<span class="badge ${map[status] || 'badge-yellow'}">${status}</span>`;
+}
+
+function renderDashboard() {
+  document.getElementById('statTotal').textContent = students.length;
+  const avgGpa = students.reduce((a,s) => a + (s.gpa || 0), 0) / students.length;
+  document.getElementById('statGpa').textContent = avgGpa.toFixed(1);
+  const avgAtt = students.reduce((a,s) => a + (s.attendance || 0), 0) / students.length;
+  document.getElementById('statAttendance').textContent = Math.round(avgAtt) + '%';
+
+  const sorted = [...students].sort((a,b) => (b.gpa||0) - (a.gpa||0)).slice(0, 4);
+  const top = document.getElementById('topPerformers');
+  top.innerHTML = sorted.map((s,i) => `
+    <div class="recent-item">
+      <div class="ri-avatar" style="background:${getColor(students.indexOf(s))}22;color:${getColor(students.indexOf(s))}">${getInitials(s)}</div>
+      <div class="ri-info">
+        <div class="ri-name">${s.firstName} ${s.lastName}</div>
+        <div class="ri-meta">${s.grade} · ${s.email}</div>
+      </div>
+      <div class="ri-score" style="color:${gradeColor(s.gpa*25)}">${s.gpa}</div>
+    </div>
+  `).join('');
+}
+
+function renderStudents(filter = '') {
+  const filtered = students.filter(s =>
+    (s.firstName + ' ' + s.lastName + ' ' + s.id).toLowerCase().includes(filter.toLowerCase())
+  );
+  document.getElementById('studentCount').textContent = `${filtered.length} students`;
+  document.getElementById('studentTable').innerHTML = filtered.map((s,i) => {
+    const ri = students.indexOf(s);
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="ri-avatar" style="width:36px;height:36px;background:${getColor(ri)}22;color:${getColor(ri)}">${getInitials(s)}</div>
+          <div>
+            <div class="student-name">${s.firstName} ${s.lastName}</div>
+            <div class="student-id">${s.id}</div>
+          </div>
+        </div>
+      </td>
+      <td>${s.grade}</td>
+      <td style="font-family:'Syne',sans-serif;font-weight:700;color:${gradeColor((s.gpa||0)*25)}">${s.gpa||'N/A'}</td>
+      <td>
+        <div>${s.attendance}%</div>
+        <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:${s.attendance}%;background:${s.attendance>=85?'var(--accent)':'var(--accent2)'}"></div></div>
+      </td>
+      <td>${statusBadge(s.status)}</td>
+      <td>
+        <div class="actions">
+          <div class="icon-btn" title="Edit" onclick="openModal(${ri})">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="icon-btn del" title="Delete" onclick="deleteStudent(${ri})">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px">No students found</td></tr>';
+}
+
+function renderGrades() {
+  const avgScores = subjects.map((_, si) => {
+    return students.reduce((a,s) => a + (s.scores ? s.scores[si] : 0), 0) / students.length;
+  });
+
+  document.getElementById('gradeGrid').innerHTML = subjects.map((subj, si) => {
+    const avg = Math.round(avgScores[si]);
+    return `<div class="grade-card">
+      <div class="grade-subject">${subjectIcons[si]} ${subj}</div>
+      <div class="grade-score" style="color:${gradeColor(avg)}">${avg}</div>
+      <div class="grade-letter"><span class="badge ${avg>=90?'badge-green':avg>=80?'badge-purple':avg>=70?'badge-yellow':'badge-red'}">${letterGrade(avg)}</span></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('gradeTable').innerHTML = students.map(s => `
+    <tr>
+      <td><strong>${s.firstName} ${s.lastName}</strong></td>
+      ${s.scores ? s.scores.map(sc => `<td style="color:${gradeColor(sc)};font-weight:600">${sc}</td>`).join('') : subjects.map(() => '<td>–</td>').join('')}
+      <td><span class="badge ${(s.gpa||0)>=3.5?'badge-green':(s.gpa||0)>=2.5?'badge-yellow':'badge-red'}">${s.gpa||'N/A'}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderAttendance() {
+  const high = students.filter(s => s.attendance >= 90).length;
+  const mid = students.filter(s => s.attendance >= 75 && s.attendance < 90).length;
+  const low = students.filter(s => s.attendance < 75).length;
+  const avg = Math.round(students.reduce((a,s) => a + (s.attendance||0), 0) / students.length);
+
+  document.getElementById('attendanceSummary').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Average Rate</div><div class="stat-value" style="font-size:28px">${avg}%</div><div class="progress-bar"><div class="progress-fill" style="width:${avg}%"></div></div></div>
+    <div class="stat-card"><div class="stat-label">High (≥90%)</div><div class="stat-value" style="font-size:28px;color:var(--accent)">${high}</div><div class="stat-change">students</div></div>
+    <div class="stat-card"><div class="stat-label">At Risk (<75%)</div><div class="stat-value" style="font-size:28px;color:var(--accent2)">${low}</div><div class="stat-change down">need attention</div></div>
+  `;
+
+  document.getElementById('attendanceTable').innerHTML = students.map(s => {
+    const present = Math.round((s.attendance||0) / 100 * 180);
+    const absent = 180 - present;
+    return `<tr>
+      <td><strong>${s.firstName} ${s.lastName}</strong></td>
+      <td style="color:var(--accent);font-weight:600">${present}</td>
+      <td style="color:var(--accent2);font-weight:600">${absent}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:${s.attendance}%;background:${s.attendance>=90?'var(--accent)':s.attendance>=75?'var(--accent3)':'var(--accent2)'}"></div></div>
+          <span>${s.attendance}%</span>
+        </div>
+      </td>
+      <td>${s.attendance >= 90 ? '<span class="badge badge-green">Excellent</span>' : s.attendance >= 75 ? '<span class="badge badge-yellow">Good</span>' : '<span class="badge badge-red">At Risk</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function render() {
+  renderDashboard();
+  renderStudents(document.getElementById('globalSearch').value);
+  renderGrades();
+  renderAttendance();
+}
+
+// Search
+document.getElementById('globalSearch').addEventListener('input', e => {
+  renderStudents(e.target.value);
+});
+
+// Init
+render();
+</script>
+</body>
+</html>
